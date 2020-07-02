@@ -19,18 +19,18 @@ app = flask.Flask(
 )
 # FIXME
 app.config['api_endpoint'] = 'http://127.0.0.1:5000'
+app.config['api_max_items'] = 100
 app.config['aws_region'] = 'eu-central-1'
 app.config['github_owner'] = 'kalrish'
 app.config['github_repo'] = 'music'
-app.config['locktable'] = 'git-lfs-apis-playground-locktable-Table-10NKA4N7XKHUI'
+app.config['locktable'] = 'git-lfs-apis-playground-locktable-Table-1GS3DIXQSTSGH'
 app.config['store_bucket'] = 'git-lfs-apis-playground-store-bucket-1p2f8sde4jq8g'
 app.config['storage_class'] = 'STANDARD'
-session = boto3.session.Session(
-)
 
 config = {
     'API': {
         'endpoint': app.config['api_endpoint'],
+        'max_items': app.config['api_max_items'],
     },
     'AWS': {
         'region': app.config['aws_region'],
@@ -44,6 +44,15 @@ config = {
         'storage_class': app.config['storage_class'],
     },
     'locktable': app.config['locktable'],
+}
+
+boto3_session = boto3.session.Session(
+)
+
+session = {
+    'boto3': {
+        'session': boto3_session,
+    },
 }
 
 
@@ -97,7 +106,22 @@ def locks():
     ],
 )
 def locks_verify():
-    response = glawit.api.locks.verify.post(
+    request = {
+        'data': flask.request.json,
+        'headers': flask.request.headers,
+    }
+
+    response = glawit.core.main.process_request(
+        config=config,
+        handler=glawit.core.api.locks.verify.post,
+        request=request,
+        session=session,
+    )
+
+    return (
+        response['body'],
+        response['statusCode'],
+        response['headers'],
     )
 
     return response
