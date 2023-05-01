@@ -9,7 +9,7 @@ packages = setuptools.find_namespace_packages(
 
 setuptools.setup(
     install_requires=[
-        'Flask == 1.1.2',
+        'Flask == 2.3.2',
     ],
     name='glawit_interface_flask',
     packages=packages,
